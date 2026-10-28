@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mug Mockup Studio</title>
+<style>
+:root{font-family:Inter,system-ui,Arial,sans-serif;color:#24302c;background:#f4f2ed}*{box-sizing:border-box}body{margin:0}header{background:#1e302e;color:white;padding:22px 32px}header h1{margin:0;font-size:26px}header p{margin:7px 0 0;color:#cad6d0}main{display:grid;grid-template-columns:340px minmax(0,1fr);gap:24px;max-width:1500px;margin:24px auto;padding:0 20px}aside,.preview{background:white;border:1px solid #daddd6;border-radius:14px;padding:20px}section{padding-bottom:20px;margin-bottom:18px;border-bottom:1px solid #e3e7df}h2{font-size:16px;margin:0 0 13px}label{display:block;font-size:13px;font-weight:600;margin:11px 0}select,input[type=file]{display:block;width:100%;margin-top:6px;padding:9px;border:1px solid #cdd4cb;border-radius:8px;background:white}button{background:#255d4e;border:0;color:white;border-radius:8px;padding:10px 14px;font-weight:650;cursor:pointer}button.secondary{background:#e9ede8;color:#244c42}button:disabled{opacity:.5}button:hover{filter:brightness(.94)}.row{display:flex;gap:10px;align-items:center;justify-content:space-between}.mug{border:1px solid #e2e7de;padding:12px;border-radius:10px;margin:10px 0}.mug label{margin:6px 0}canvas{display:block;width:100%;max-width:740px;aspect-ratio:1;background:#e9e4db;margin:15px auto;touch-action:none;border-radius:8px}.preview .row{flex-wrap:wrap}.hint{font-size:12px;line-height:1.55;color:#657269}.status{padding:12px;background:#f0f4ee;border-radius:8px;font-size:13px;line-height:1.5}.tabs{display:flex;gap:8px}.file-label{cursor:pointer}.range{width:100%}@media(max-width:870px){main{grid-template-columns:1fr}} 
+</style>
+</head><body>
+<header><h1>Mug Mockup Studio</h1><p>Keep the original street artwork intact. Build reusable Etsy compositions.</p></header>
+<main>
+<aside>
+<section><h2>1 · Import cartographic prints</h2>
+<label>Street-print ZIP <input id="archive" type="file" accept=".zip"></label>
+<div class="status" id="status">Choose the ZIP of original *_wrap_print.png files. Processed locally, not uploaded.</div></section>
+<section><h2>2 · Scene and people</h2>
+<label>Background style<select id="scene"><option value="studio">Warm studio</option><option value="kitchen">Bright kitchen</option><option value="cottage">Yorkshire cottage</option><option value="cafe">Coffee shop</option><option value="clean">Minimal studio</option></select></label>
+<label>Scene photograph<input id="photo" type="file" accept="image/*"></label>
+<label>People (saved as scene brief)<select id="people"><option>No people</option><option>Children</option><option>Grandparents</option><option>Older couple</option><option>Family</option><option>Young adults</option></select></label>
+<p class="hint">The people selector does not generate people. Upload a suitable scene photograph. Physical hand masking and AI scene creation are not yet implemented.</p></section>
+<section><h2>3 · Mugs (up to 3)</h2><div id="mugControls"></div></section>
+<section><h2>4 · Arrange and save</h2>
+<label>Selected mug size<input class="range" id="size" type="range" min=".35" max="1.8" step=".05" value="1"></label>
+<div class="row"><button class="secondary" id="reset">Reset layout</button><button class="secondary" id="save">Save setup</button></div>
+<p class="hint">Click a mug to select and drag it; the size slider adjusts the active mug. Import a saved setup below.</p>
+<label>Load saved setup<input type="file" id="load" accept=".json"></label></section>
+</aside>
+<div class="preview"><div class="row"><div><h2>Live preview</h2><p class="hint">1400 × 1400 · Your actual PNG artwork, not AI-generated text</p></div><button id="export">Export Etsy PNG</button></div>
+<canvas id="canvas" width="1400" height="1400" aria-label="Mug mockup editor"></canvas>
+<p class="hint">This is an illustration-based composition MVP. It does not claim to produce photorealistic hand occlusion or manufacturing-accurate cylindrical wraps. Each mug shows only one half of its original print at a time.</p></div>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+const $=id=>document.getElementById(id),c=$('canvas'),ctx=c.getContext('2d'),W=1400;
+const base=[{x:700,y:870,scale:1,visible:true,side:'front',design:''},{x:1040,y:950,scale:.68,visible:false,side:'front',design:''},{x:360,y:950,scale:.68,visible:false,side:'back',design:''}];
+let mugs=structuredClone(base),designs=new Map(),active=0,photo=null,drag=null;
+const palettes={studio:['#e9e3d7','#c3ad98'],kitchen:['#e6eee5','#bac5b6'],cottage:['#e7d4bf','#ac8f74'],cafe:['#e3cab0','#988276'],clean:['#f9faf7','#dddeda']};
+const eligible=n=>/\b(road|street|lane|avenue|terrace|crescent|close|grove|drive|court|place|way|gardens|square|villas|mount|hill|croft|row|walk)\b/i.test(n)&&!/\bbridge\b/i.test(n);
+function nameOf(n){return n.split('/').pop().replace(/\.png$/i,'').replace(/^\d+_/,'').replace(/_wrap_print$/i,'').replace(/_/g,' ')}
+function loadImage(b){return new Promise((resolve,reject)=>{let i=new Image(),u=URL.createObjectURL(b);i.onload=()=>{URL.revokeObjectURL(u);resolve(i)};i.onerror=()=>{URL.revokeObjectURL(u);reject(new Error('Invalid image'))};i.src=u})}
+function store(){localStorage.setItem('mug-studio-config',JSON.stringify({mugs,scene:$('scene').value,people:$('people').value,active}))}
+function controls(){
+ const names=[...designs.keys()].sort((a,b)=>a.localeCompare(b));
+ $('mugControls').innerHTML=mugs.map((m,i)=>'<div class="mug"><div class="row"><button type="button" class="secondary" data-select="'+i+'">Mug '+(i+1)+'</button><label><input data-visible="'+i+'" type="checkbox" '+(m.visible?'checked':'')+'> Show</label></div><label>Street<select data-design="'+i+'">'+(names.length?names.map(n=>'<option value="'+n.replaceAll('"','&quot;')+'" '+(n===m.design?'selected':'')+'>'+n.replaceAll('<','&lt;')+'</option>').join(''):'<option>Import your ZIP</option>')+'</select></label><label>Visible side<select data-side="'+i+'"><option value="front" '+(m.side==='front'?'selected':'')+'>Front · face</option><option value="back" '+(m.side==='back'?'selected':'')+'>Back · map</option></select></label></div>').join('');
+ document.querySelectorAll('[data-select]').forEach(el=>el.onclick=()=>{active=+el.dataset.select;$('size').value=mugs[active].scale;store();draw()});
+ document.querySelectorAll('[data-visible]').forEach(el=>el.onchange=()=>{mugs[+el.dataset.visible].visible=el.checked;store();draw()});
+ document.querySelectorAll('[data-design]').forEach(el=>el.onchange=()=>{mugs[+el.dataset.design].design=el.value;store();draw()});
+ document.querySelectorAll('[data-side]').forEach(el=>el.onchange=()=>{mugs[+el.dataset.side].side=el.value;store();draw()});
+}
+function mugRect(m){let w=380*m.scale,h=310*m.scale;return {x:m.x-w/2,y:m.y-h/2,w,h}}
+function draw(){
+ let [a,b]=palettes[$('scene').value]||palettes.studio,gr=ctx.createLinearGradient(0,0,W,W);gr.addColorStop(0,a);gr.addColorStop(1,b);ctx.fillStyle=gr;ctx.fillRect(0,0,W,W);
+ if(photo){let k=Math.max(W/photo.width,W/photo.height),w=photo.width*k,h=photo.height*k;ctx.drawImage(photo,(W-w)/2,(W-h)/2,w,h)}
+ for(let i=0;i<mugs.length;i++){
+  let m=mugs[i];if(!m.visible)continue;
+  const r=mugRect(m),{x,y,w,h}=r;
+  ctx.save();ctx.fillStyle='#00000024';ctx.beginPath();ctx.ellipse(m.x,m.y+h*.57,w*.54,h*.12,0,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#f2f2ef';ctx.lineWidth=36*m.scale;ctx.beginPath();ctx.ellipse(x+w*.94,y+h*.43,w*.24,h*.31,0,0,Math.PI*2);ctx.stroke();
+  ctx.shadowColor='#0004';ctx.shadowBlur=21*m.scale;ctx.shadowOffsetY=9*m.scale;
+  const q=ctx.createLinearGradient(x,y,x+w,y);q.addColorStop(0,'#dadbd9');q.addColorStop(.19,'#fff');q.addColorStop(.74,'#fff');q.addColorStop(1,'#cbcecc');
+  ctx.fillStyle=q;ctx.beginPath();ctx.moveTo(x+w*.03,y);ctx.lineTo(x+w*.97,y);ctx.lineTo(x+w*.9,y+h*.93);ctx.quadraticCurveTo(x+w*.5,y+h*1.05,x+w*.1,y+h*.93);ctx.closePath();ctx.fill();ctx.restore();
+  let img=designs.get(m.design);if(img){
+   ctx.save();ctx.beginPath();ctx.moveTo(x+w*.07,y+h*.14);ctx.lineTo(x+w*.93,y+h*.14);ctx.lineTo(x+w*.87,y+h*.83);ctx.quadraticCurveTo(x+w*.5,y+h*.89,x+w*.13,y+h*.83);ctx.closePath();ctx.clip();
+   const half=img.width/2,sx=m.side==='front'?0:half;
+   // Each side uses only its own half. No artificial lettering or redrawing.
+   ctx.drawImage(img,sx,0,half,img.height,x+w*.09,y+h*.14,w*.82,h*.7);
+   let shading=ctx.createLinearGradient(x+w*.09,0,x+w*.91,0);
+   shading.addColorStop(0,'#00000028');shading.addColorStop(.25,'#ffffff00');shading.addColorStop(.7,'#ffffff00');shading.addColorStop(1,'#00000021');
+   ctx.fillStyle=shading;ctx.fillRect(x,y,w,h);ctx.restore();
+  }
+  if(i===active){ctx.save();ctx.setLineDash([10,7]);ctx.strokeStyle='#28725e';ctx.lineWidth=3;ctx.strokeRect(x-9,y-9,w+18,h+18);ctx.restore()}
+ }
+}
+$('archive').onchange=async e=>{
+ const f=e.target.files[0];if(!f)return;
+ if(!window.JSZip){$('status').textContent='ZIP library unavailable. Check internet access and reload.';return}
+ $('status').textContent='Reading ZIP…';
+ try{
+  const z=await JSZip.loadAsync(f),entries=Object.values(z.files).filter(v=>!v.dir&&/_wrap_print\.png$/i.test(v.name)&&eligible(nameOf(v.name))),next=new Map();
+  for(const item of entries){try{const img=await loadImage(await item.async('blob'));next.set(nameOf(item.name),img)}catch(e){console.warn(item.name,e)}}
+  designs=next;const keys=[...next.keys()].sort();mugs.forEach((m,i)=>{if(!next.has(m.design))m.design=keys[Math.min(i,keys.length-1)]||''});
+  $('status').textContent=next.size+' eligible street prints loaded. Bridges and non-street entries excluded.';controls();draw();store();
+ }catch(err){$('status').textContent='Could not import ZIP: '+err.message}
+};
+$('photo').onchange=async e=>{if(e.target.files[0]){try{photo=await loadImage(e.target.files[0]);draw()}catch(err){alert(err.message)}}};
+['scene','people'].forEach(id=>$(id).onchange=()=>{store();draw()});
+$('size').oninput=e=>{mugs[active].scale=+e.target.value;store();draw()};
+$('reset').onclick=()=>{mugs.forEach((m,i)=>Object.assign(m,{x:base[i].x,y:base[i].y,scale:base[i].scale}));$('size').value=mugs[active].scale;store();draw()};
+$('save').onclick=()=>download(new Blob([JSON.stringify({scene:$('scene').value,people:$('people').value,mugs},null,2)],{type:'application/json'}),'mug-studio-setup.json');
+$('load').onchange=async e=>{try{let v=JSON.parse(await e.target.files[0].text());if(!Array.isArray(v.mugs)||v.mugs.length!==3)throw Error('Not a valid setup');mugs=v.mugs;$('scene').value=palettes[v.scene]?v.scene:'studio';$('people').value=v.people||'No people';controls();draw();store()}catch(err){alert('Cannot load setup: '+err.message)}};
+$('export').onclick=()=>c.toBlob(b=>{if(b)download(b,'etsy-mug-mockup.png')},'image/png');
+function download(blob,name){let u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
+function pt(e){let r=c.getBoundingClientRect();return {x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*W/r.height}}
+c.addEventListener('pointerdown',e=>{let p=pt(e);for(let i=mugs.length-1;i>=0;i--){let m=mugs[i],r=mugRect(m);if(m.visible&&p.x>=r.x&&p.x<=r.x+r.w&&p.y>=r.y&&p.y<=r.y+r.h){active=i;drag={x:p.x-m.x,y:p.y-m.y};c.setPointerCapture(e.pointerId);$('size').value=m.scale;draw();return}}});
+c.addEventListener('pointermove',e=>{if(!drag)return;let p=pt(e);mugs[active].x=p.x-drag.x;mugs[active].y=p.y-drag.y;draw()});
+c.addEventListener('pointerup',()=>{if(drag){drag=null;store()}});c.addEventListener('pointercancel',()=>{drag=null});
+try{let v=JSON.parse(localStorage.getItem('mug-studio-config')||'null');if(v){if(v.mugs?.length===3)mugs=v.mugs;if(palettes[v.scene])$('scene').value=v.scene;if(v.people)$('people').value=v.people;active=v.active||0}}catch{}
+controls();draw();
+</script></body></html>
