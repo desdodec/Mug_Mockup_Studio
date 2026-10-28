@@ -80,7 +80,7 @@ $('sceneImages').onchange=async e=>{
  let n=0,errors=[];
  for(const file of [...e.target.files]){
   if(!file.type.startsWith('image/'))continue;
-  const match=file.name.match(/^(\\d{1,2})[_ -]/);
+  const match=file.name.match(/^(\d{1,2})[_ -]/);
   const index=match?Number(match[1])-1:-1;
   const id=photoOrder[index]||specs.find(s=>file.name.toLowerCase().includes(s.id))?.id;
   if(!id){errors.push(file.name);continue}
