@@ -6,9 +6,9 @@ A standalone browser-based editor for creating illustrative Etsy mockups using y
 
 1. Clone or pull the repository in VS Code.
 2. Open `index.html` in a web browser. You can also use the VS Code **Live Server** extension.
-3. Import your ZIP containing files named `*_wrap_print.png`.
+3. Select one or more PNG, JPEG or WebP print images. You can import more images without clearing the existing selection.
 
-The app loads JSZip from a public CDN, so **internet access is required** when opening it. Artwork is processed locally in your browser and is not uploaded to a server.
+No external JavaScript library is required. Artwork is processed locally in your browser and is not uploaded to a server.
 
 ### Windows PowerShell
 
@@ -27,7 +27,7 @@ git pull origin main
 
 ## Current features
 
-- Import street print PNGs from a ZIP and filter out bridges and entries without a recognised street suffix.
+- Import one or multiple PNG, JPEG or WebP artwork files directly; the filename becomes the design name. Files are no longer filtered by street suffix.
 - Select up to three different designs and independently choose front (face) or back (map) print sides.
 - Preview each side using the actual original image, rather than AI-redrawn artwork.
 - Move and resize illustrated mugs in a square 1400px workspace.
@@ -36,9 +36,9 @@ git pull origin main
 
 ## Limitations
 
-This is a working **illustration-based MVP**, not a photorealistic replacement for mug photography. Mug shapes and artwork projection are approximations; hand occlusion and real photographed mug surface mapping are **not implemented**. The people choice is metadata and does not generate people. Re-import the ZIP after a page reload; image assets are not persisted. The artwork assumes each print's left half is the front and right half is the back.
+This is a working **illustration-based MVP**, not a photorealistic replacement for mug photography. Mug shapes and artwork projection are approximations; hand occlusion and real photographed mug surface mapping are **not implemented**. The people choice is metadata and does not generate people. Re-import your images after a page reload; image assets are not persisted. The artwork assumes each print's left half is the front and right half is the back.
 
-Never put your private print ZIP into the public repository unless you intend to share those files.
+Never put your private print files into the public repository unless you intend to share them.
 
 ## Development roadmap
 
