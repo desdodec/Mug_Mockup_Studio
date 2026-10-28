@@ -11,8 +11,8 @@
 <main>
 <aside>
 <section><h2>1 · Import cartographic prints</h2>
-<label>Street-print ZIP <input id="archive" type="file" accept=".zip"></label>
-<div class="status" id="status">Choose the ZIP of original *_wrap_print.png files. Processed locally, not uploaded.</div></section>
+<label>Upload one or more mug print images <input id="archive" type="file" accept="image/png,image/jpeg,image/webp" multiple></label>
+<div class="status" id="status">Choose a single PNG or select several PNG, JPG or WebP files at once. Files stay in your browser.</div></section>
 <section><h2>2 · Scene and people</h2>
 <label>Background style<select id="scene"><option value="studio">Warm studio</option><option value="kitchen">Bright kitchen</option><option value="cottage">Yorkshire cottage</option><option value="cafe">Coffee shop</option><option value="clean">Minimal studio</option></select></label>
 <label>Scene photograph<input id="photo" type="file" accept="image/*"></label>
@@ -29,7 +29,6 @@
 <canvas id="canvas" width="1400" height="1400" aria-label="Mug mockup editor"></canvas>
 <p class="hint">This is an illustration-based composition MVP. It does not claim to produce photorealistic hand occlusion or manufacturing-accurate cylindrical wraps. Each mug shows only one half of its original print at a time.</p></div>
 </main>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
 const $=id=>document.getElementById(id),c=$('canvas'),ctx=c.getContext('2d'),W=1400;
 const base=[{x:700,y:870,scale:1,visible:true,side:'front',design:''},{x:1040,y:950,scale:.68,visible:false,side:'front',design:''},{x:360,y:950,scale:.68,visible:false,side:'back',design:''}];
@@ -72,15 +71,24 @@ function draw(){
  }
 }
 $('archive').onchange=async e=>{
- const f=e.target.files[0];if(!f)return;
- if(!window.JSZip){$('status').textContent='ZIP library unavailable. Check internet access and reload.';return}
- $('status').textContent='Reading ZIP…';
- try{
-  const z=await JSZip.loadAsync(f),entries=Object.values(z.files).filter(v=>!v.dir&&/_wrap_print\.png$/i.test(v.name)&&eligible(nameOf(v.name))),next=new Map();
-  for(const item of entries){try{const img=await loadImage(await item.async('blob'));next.set(nameOf(item.name),img)}catch(e){console.warn(item.name,e)}}
-  designs=next;const keys=[...next.keys()].sort();mugs.forEach((m,i)=>{if(!next.has(m.design))m.design=keys[Math.min(i,keys.length-1)]||''});
-  $('status').textContent=next.size+' eligible street prints loaded. Bridges and non-street entries excluded.';controls();draw();store();
- }catch(err){$('status').textContent='Could not import ZIP: '+err.message}
+ const files=[...e.target.files];if(!files.length)return;
+ $('status').textContent='Loading '+files.length+' image'+(files.length===1?'':'s')+'…';
+ let loaded=0,failed=0;
+ for(const file of files){
+   if(!file.type.startsWith('image/')){failed++;continue}
+   try{
+     const img=await loadImage(file);
+     const name=nameOf(file.name);
+     designs.set(name,img);
+     loaded++;
+   }catch(err){failed++;console.warn('Cannot load',file.name,err)}
+ }
+ const keys=[...designs.keys()].sort((a,b)=>a.localeCompare(b));
+ mugs.forEach((m,i)=>{if(!designs.has(m.design))m.design=keys[Math.min(i,keys.length-1)]||''});
+ $('status').textContent=loaded+' image'+(loaded===1?'':'s')+' loaded'+(failed?' · '+failed+' could not be read':'')+'. '+designs.size+' total designs available.';
+ controls();draw();store();
+ // Permit selecting the same file again after clearing/change.
+ e.target.value='';
 };
 $('photo').onchange=async e=>{if(e.target.files[0]){try{photo=await loadImage(e.target.files[0]);draw()}catch(err){alert(err.message)}}};
 ['scene','people'].forEach(id=>$(id).onchange=()=>{store();draw()});
