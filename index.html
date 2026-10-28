@@ -10,7 +10,7 @@
 <section><h2>4 · Adjust selected mug</h2>
 <label>Size<input id="scale" type="range" min=".3" max="2" step=".01" value="1"></label>
 <label>Rotation<input id="rotation" type="range" min="-30" max="30" step="1" value="0"></label>
-<label>Artwork coverage<input id="coverage" type="range" min=".5" max="1" step=".01" value=".85"></label>
+<label>Artwork coverage<input id="coverage" type="range" min=".3" max="1.5" step=".01" value=".85"></label><label>Print width<input id="printWidth" type="range" min=".25" max="1.6" step=".01" value="1"></label><label>Print height<input id="printHeight" type="range" min=".25" max="1.6" step=".01" value="1"></label><label><input id="guides" type="checkbox" checked> Show placement guides (not exported)</label>
 <div class="row"><button id="save" class="alt">Save layout</button><button id="reset" class="alt">Reset scene</button></div>
 <label>Load saved layout<input id="load" type="file" accept=".json"></label></section>
 </aside><div class="panel preview"><div class="row"><div><h2>Live Etsy preview</h2><small>1400 × 1400 PNG · drag any mug to reposition</small></div><button id="export">Export PNG</button></div>
@@ -33,7 +33,7 @@ const specs=[
 {id:'breakfast',label:'Family breakfast',palette:['#ecd2a9','#bd9d80'],kind:'landscape',n:3,positions:[[280,910],[700,920],[1090,910]]},
 {id:'town',label:'Town view',palette:['#b5d3cf','#7fa18c'],kind:'landscape',n:3,positions:[[270,925],[690,935],[1100,925]]}
 ];
-let scene=specs[0],background=null,photoScenes=new Map(),library=new Map(),nextKey=0,mugs=[],selected=-1,drag=null;
+let scene=specs[0],background=null,photoScenes=new Map(),library=new Map(),nextKey=0,mugs=[],selected=-1,drag=null,showGuides=true;
 function image(file){return new Promise((resolve,reject)=>{let im=new Image(),url=URL.createObjectURL(file);im.onload=()=>{URL.revokeObjectURL(url);resolve(im)};im.onerror=()=>{URL.revokeObjectURL(url);reject(Error('Invalid image'))};im.src=url})}
 function filename(s){return s.replace(/\.[^.]+$/,'').replace(/^\d+_/,'').replace(/_wrap_print$/i,'').replace(/_/g,' ')}
 function pictogram(ctx,kind){ctx.save();const w=S;
@@ -56,7 +56,7 @@ function renderMug(ctx,p,sel){let a=geometry(p),{w,h}=a;ctx.save();ctx.translate
    const data=library.get(p.key);
    if(data){
      const im=data.image,sw=im.width/2,sx=p.side==='front'?0:sw;
-     const dw=w*.80*p.coverage,dh=h*.70;
+     const dw=w*.80*p.coverage*(p.printWidth||1),dh=h*.70*(p.printHeight||1);
      ctx.save();
      ctx.beginPath();ctx.roundRect(-dw/2,-dh/2,dw,dh,Math.min(dw,dh)*.08);ctx.clip();
      const n=130;
@@ -70,7 +70,7 @@ function renderMug(ctx,p,sel){let a=geometry(p),{w,h}=a;ctx.save();ctx.translate
      gloss.addColorStop(0,'#00000020');gloss.addColorStop(.22,'#ffffff00');gloss.addColorStop(.78,'#ffffff00');gloss.addColorStop(1,'#00000016');
      ctx.fillStyle=gloss;ctx.fillRect(-dw/2,-dh/2,dw,dh);ctx.restore();
    }
-   if(sel){ctx.setLineDash([8,6]);ctx.strokeStyle='#23876b';ctx.lineWidth=3;ctx.strokeRect(-w/2,-h/2,w,h)}
+   if(sel&&showGuides){ctx.setLineDash([8,6]);ctx.strokeStyle='#23876b';ctx.lineWidth=3;ctx.strokeRect(-w/2,-h/2,w,h)}
    ctx.restore();return;
  }
  ctx.fillStyle='#0b20172b';ctx.beginPath();ctx.ellipse(0,h*.54,w*.62,h*.10,0,0,7);ctx.fill();
@@ -84,9 +84,9 @@ function renderMug(ctx,p,sel){let a=geometry(p),{w,h}=a;ctx.save();ctx.translate
  let shading=ctx.createLinearGradient(-w*.5,0,w*.5,0);shading.addColorStop(0,'#1a291a22');shading.addColorStop(.25,'#ffffff00');shading.addColorStop(.7,'#ffffff00');shading.addColorStop(1,'#131f1b22');ctx.fillStyle=shading;ctx.fillRect(-w/2,-h/2,w,h)}
  ctx.restore();
  ctx.strokeStyle='#a7b4ae';ctx.lineWidth=5*p.scale;ctx.beginPath();ctx.ellipse(0,-h*.46,w*.49,h*.055,0,0,7);ctx.stroke();
- if(sel){ctx.strokeStyle='#23876b';ctx.lineWidth=3;ctx.setLineDash([10,7]);ctx.strokeRect(-w/2-8,-h/2-8,w+16,h+16)}ctx.restore()}
+ if(sel&&showGuides){ctx.strokeStyle='#23876b';ctx.lineWidth=3;ctx.setLineDash([10,7]);ctx.strokeRect(-w/2-8,-h/2-8,w+16,h+16)}ctx.restore()}
 function draw(){drawScene();mugs.forEach((p,i)=>renderMug(g,p,i===selected))}
-function setScene(id){scene=specs.find(s=>s.id===id)||specs[0];background=null;$('backgroundInput').value='';mugs=scene.positions.map((pos,i)=>({x:pos[0],y:pos[1],key:[...library.keys()][Math.min(i,library.size-1)]||'',scale:1,side:i%2?'back':'front',rotation:0,coverage:.85}));selected=mugs.length?0:-1;ui();draw()}
+function setScene(id){scene=specs.find(s=>s.id===id)||specs[0];background=null;$('backgroundInput').value='';mugs=scene.positions.map((pos,i)=>({x:pos[0],y:pos[1],key:[...library.keys()][Math.min(i,library.size-1)]||'',scale:1,side:i%2?'back':'front',rotation:0,coverage:.85,printWidth:1,printHeight:1}));selected=mugs.length?0:-1;ui();draw()}
 function ui(){const names=[...library.entries()];$('scenes').innerHTML='';
  for(const s of specs){const b=document.createElement('button');b.className='scene'+(s.id===scene.id?' active':'');b.innerHTML='<svg viewBox="0 0 240 90" preserveAspectRatio="none"><defs><linearGradient id="gr'+s.id+'" x2="0" y2="1"><stop stop-color="'+s.palette[0]+'"/><stop offset="1" stop-color="'+s.palette[1]+'"/></linearGradient></defs><rect width="240" height="90" fill="url(#gr'+s.id+')"/><rect x="0" y="65" width="240" height="25" fill="#b78f6b"/>'+(s.kind==='landscape'?'<path d="M0 60 Q40 12 100 55 Q150 10 240 57" fill="#70976e"/>':'<circle cx="90" cy="25" r="14" fill="#c4a38c"/><ellipse cx="90" cy="68" rx="28" ry="33" fill="#5d8073"/>')+'<rect x="142" y="49" width="31" height="33" rx="3" fill="white" stroke="#aab2ac"/></svg><span>'+s.label+'</span>';b.onclick=()=>setScene(s.id);if(photoScenes.has(s.id)){const note=document.createElement('small');note.textContent=' · photo loaded';b.querySelector('span').append(note)}$('scenes').append(b)}
  $('slots').innerHTML='';for(let i=0;i<mugs.length;i++){const p=mugs[i],box=document.createElement('div');box.className='slot'+(i===selected?' selected':'');const name=document.createElement('button');name.className='alt';name.textContent='Mug '+(i+1);name.onclick=()=>select(i);box.append(name);
@@ -94,7 +94,7 @@ function ui(){const names=[...library.entries()];$('scenes').innerHTML='';
  const side=document.createElement('select');side.innerHTML='<option value="front">Front · face</option><option value="back">Back · map</option>';side.value=p.side;side.onchange=()=>{p.side=side.value;draw()};box.append(side);$('slots').append(box)}
  $('add').disabled=mugs.length>=3;$('remove').disabled=selected<0;
 }
-function select(i){selected=i;const p=mugs[i];if(p){$('scale').value=p.scale;$('rotation').value=p.rotation;$('coverage').value=p.coverage}ui();draw()}
+function select(i){selected=i;const p=mugs[i];if(p){$('scale').value=p.scale;$('rotation').value=p.rotation;$('coverage').value=p.coverage;$('printWidth').value=p.printWidth||1;$('printHeight').value=p.printHeight||1}ui();draw()}
 $('prints').onchange=async e=>{let ok=0,bad=[];for(let f of e.target.files){if(!f.type.startsWith('image/'))continue;try{let im=await image(f),key='art'+(++nextKey);library.set(key,{image:im,name:filename(f.name)});ok++}catch{bad.push(f.name)}}mugs.forEach((p,i)=>{if(!library.has(p.key))p.key=[...library.keys()][Math.min(i,library.size-1)]||''});$('status').textContent=library.size+' prints available · '+ok+' newly loaded'+(bad.length?' · could not read '+bad.join(', '):'');ui();draw();e.target.value=''};
 // Import scene-pack JPEGs by numbered filename; choose the matching scene.
 const photoOrder=['workmates','home','countryside','party','friends','rural','kitchen','office','living','cafe','breakfast','town'];
@@ -113,12 +113,13 @@ $('sceneImages').onchange=async e=>{
  ui();draw();e.target.value='';
 };
 $('backgroundInput').onchange=async e=>{try{if(e.target.files[0])background=await image(e.target.files[0]);draw()}catch(err){alert(err.message)}};
-$('add').onclick=()=>{if(mugs.length>=3)return;let i=mugs.length;mugs.push({key:[...library.keys()][Math.min(i,library.size-1)]||'',x:400+i*290,y:880,scale:.8,rotation:0,coverage:.85,side:'front'});select(i)};
+$('add').onclick=()=>{if(mugs.length>=3)return;let i=mugs.length;mugs.push({key:[...library.keys()][Math.min(i,library.size-1)]||'',x:400+i*290,y:880,scale:.8,rotation:0,coverage:.85,printWidth:1,printHeight:1,side:'front'});select(i)};
 $('remove').onclick=()=>{if(selected<0)return;mugs.splice(selected,1);selected=mugs.length?0:-1;ui();draw()};
-for(const id of ['scale','rotation','coverage'])$(id).oninput=e=>{if(selected<0)return;mugs[selected][id]=+e.target.value;draw()};
+for(const id of ['scale','rotation','coverage','printWidth','printHeight'])$(id).oninput=e=>{if(selected<0)return;mugs[selected][id]=+e.target.value;draw()};
+$('guides').onchange=e=>{showGuides=e.target.checked;draw()};
 $('reset').onclick=()=>setScene(scene.id);
 function download(blob,name){let a=document.createElement('a'),u=URL.createObjectURL(blob);a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),2000)}
-$('export').onclick=()=>{const sel=selected;selected=-1;draw();canvas.toBlob(b=>{if(b)download(b,'etsy-mug-mockup.png');selected=sel;draw()},'image/png')};
+$('export').onclick=()=>{const prev=showGuides;showGuides=false;draw();canvas.toBlob(b=>{if(b)download(b,'etsy-mug-mockup.png');showGuides=prev;draw()},'image/png')};
 $('save').onclick=()=>download(new Blob([JSON.stringify({scene:scene.id,mugs:mugs.map(p=>({...p,name:library.get(p.key)?.name}))},null,2)],{type:'application/json'}),'mug-mockup-layout.json');
 $('load').onchange=async e=>{try{const data=JSON.parse(await e.target.files[0].text());if(!specs.some(s=>s.id===data.scene)||!Array.isArray(data.mugs)||data.mugs.length>3)throw Error('Invalid layout');setScene(data.scene);let names=new Map([...library].map(([k,v])=>[v.name,k]));mugs=data.mugs.map(p=>({...p,key:names.get(p.name)||p.key}));select(mugs.length?0:-1)}catch(err){alert(err.message)}};
 function pt(e){let r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*S/r.width,y:(e.clientY-r.top)*S/r.height}}
