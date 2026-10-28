@@ -1,107 +1,102 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Mug Mockup Studio</title>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mug Mockup Studio — Finished Mug Compositor</title>
 <style>
-:root{font-family:Inter,system-ui,Arial,sans-serif;color:#24302c;background:#f4f2ed}*{box-sizing:border-box}body{margin:0}header{background:#1e302e;color:white;padding:22px 32px}header h1{margin:0;font-size:26px}header p{margin:7px 0 0;color:#cad6d0}main{display:grid;grid-template-columns:340px minmax(0,1fr);gap:24px;max-width:1500px;margin:24px auto;padding:0 20px}aside,.preview{background:white;border:1px solid #daddd6;border-radius:14px;padding:20px}section{padding-bottom:20px;margin-bottom:18px;border-bottom:1px solid #e3e7df}h2{font-size:16px;margin:0 0 13px}label{display:block;font-size:13px;font-weight:600;margin:11px 0}select,input[type=file]{display:block;width:100%;margin-top:6px;padding:9px;border:1px solid #cdd4cb;border-radius:8px;background:white}button{background:#255d4e;border:0;color:white;border-radius:8px;padding:10px 14px;font-weight:650;cursor:pointer}button.secondary{background:#e9ede8;color:#244c42}button:disabled{opacity:.5}button:hover{filter:brightness(.94)}.row{display:flex;gap:10px;align-items:center;justify-content:space-between}.mug{border:1px solid #e2e7de;padding:12px;border-radius:10px;margin:10px 0}.mug label{margin:6px 0}canvas{display:block;width:100%;max-width:740px;aspect-ratio:1;background:#e9e4db;margin:15px auto;touch-action:none;border-radius:8px}.preview .row{flex-wrap:wrap}.hint{font-size:12px;line-height:1.55;color:#657269}.status{padding:12px;background:#f0f4ee;border-radius:8px;font-size:13px;line-height:1.5}.tabs{display:flex;gap:8px}.file-label{cursor:pointer}.range{width:100%}@media(max-width:870px){main{grid-template-columns:1fr}} 
-</style>
-</head><body>
-<header><h1>Mug Mockup Studio</h1><p>Keep the original street artwork intact. Build reusable Etsy compositions.</p></header>
-<main>
-<aside>
-<section><h2>1 · Import cartographic prints</h2>
-<label>Upload one or more mug print images <input id="archive" type="file" accept="image/png,image/jpeg,image/webp" multiple></label>
-<div class="status" id="status">Choose a single PNG or select several PNG, JPG or WebP files at once. Files stay in your browser.</div></section>
-<section><h2>2 · Scene and people</h2>
-<label>Background style<select id="scene"><option value="studio">Warm studio</option><option value="kitchen">Bright kitchen</option><option value="cottage">Yorkshire cottage</option><option value="cafe">Coffee shop</option><option value="clean">Minimal studio</option></select></label>
-<label>Scene photograph<input id="photo" type="file" accept="image/*"></label>
-<label>People (saved as scene brief)<select id="people"><option>No people</option><option>Children</option><option>Grandparents</option><option>Older couple</option><option>Family</option><option>Young adults</option></select></label>
-<p class="hint">The people selector does not generate people. Upload a suitable scene photograph. Physical hand masking and AI scene creation are not yet implemented.</p></section>
-<section><h2>3 · Mugs (up to 3)</h2><div id="mugControls"></div></section>
-<section><h2>4 · Arrange and save</h2>
-<label>Selected mug size<input class="range" id="size" type="range" min=".35" max="1.8" step=".05" value="1"></label>
-<div class="row"><button class="secondary" id="reset">Reset layout</button><button class="secondary" id="save">Save setup</button></div>
-<p class="hint">Click a mug to select and drag it; the size slider adjusts the active mug. Import a saved setup below.</p>
-<label>Load saved setup<input type="file" id="load" accept=".json"></label></section>
+:root{font:15px system-ui,Segoe UI,Arial,sans-serif;color:#273932;background:#f2f3f0}*{box-sizing:border-box}body{margin:0}header{background:#173f37;color:white;padding:18px 26px}header h1{font-size:23px;margin:0}header p{color:#ccdbd5;margin:6px 0 0}main{display:grid;grid-template-columns:350px minmax(0,1fr);gap:20px;max-width:1480px;margin:22px auto;padding:0 16px}aside,.panel{background:white;border-radius:15px;padding:20px;border:1px solid #d8dfd8}section{border-bottom:1px solid #e0e6df;padding-bottom:17px;margin-bottom:17px}h2{font-size:16px;margin:0 0 12px}label{display:block;font-size:13px;font-weight:650;margin:10px 0}input[type=file],select,input[type=range]{display:block;width:100%;margin-top:6px}select,input[type=file]{padding:9px;border:1px solid #c9d3cb;border-radius:8px;background:white}button{border:0;border-radius:8px;padding:10px 13px;background:#246b58;color:white;font-weight:650;cursor:pointer}button.secondary{background:#e9efeb;color:#285847}button:disabled{opacity:.45}.row{display:flex;align-items:center;gap:8px;justify-content:space-between;flex-wrap:wrap}.hint{color:#68766e;font-size:12px;line-height:1.5}.notice{padding:12px;background:#eff5ee;border-radius:9px;font-size:13px}.item{border:1px solid #e0e5df;padding:10px;margin-top:8px;border-radius:10px}.item.active{border-color:#2e8668;background:#f5faf6}.item label{margin:7px 0}canvas{display:block;width:100%;max-width:760px;aspect-ratio:1;touch-action:none;margin:12px auto;border-radius:8px;background:#e7e7e2}.swatches{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.swatches button{font-size:12px}.panel{min-width:0}.button-row{display:flex;gap:8px;flex-wrap:wrap}@media(max-width:920px){main{grid-template-columns:1fr}}
+</style></head><body>
+<header><h1>Mug Mockup Studio</h1><p>Compose your finished printed mugs into Etsy lifestyle photographs — never redraw the print.</p></header>
+<main><aside>
+<section><h2>1 · Upload finished mug images</h2><label>One or several mug photos (PNG, JPG, WebP)<input type="file" id="mugFiles" accept="image/png,image/jpeg,image/webp" multiple></label>
+<p class="hint">Use photos of the real printed mug against a plain white background. Upload front and rear as separate photos if needed.</p>
+<div class="notice" id="status">No mug images loaded.</div></section>
+<section><h2>2 · Choose a scene</h2>
+<div class="swatches"><button data-scene="studio" class="secondary">Studio</button><button data-scene="kitchen" class="secondary">Kitchen tones</button><button data-scene="cottage" class="secondary">Cottage tones</button></div>
+<label>Upload a real scene photograph<input type="file" id="sceneFile" accept="image/*"></label>
+<p class="hint">A scene photograph can include people, a table or interior. Background presets are illustrative palettes, not generated photographs. To place a mug convincingly in someone's hands, a dedicated foreground/hand mask is still needed.</p>
+<label>Scene brief / demographic<select id="demographic"><option>No people</option><option>Children</option><option>Grandparents</option><option>Older couple</option><option>Family</option><option>Young adults</option></select></label></section>
+<section><h2>3 · Place your mugs</h2><div id="items"></div>
+<div class="row"><button id="add" class="secondary">Add mug to scene</button><button id="remove" class="secondary">Remove selected</button></div></section>
+<section><h2>4 · Fine-tune selected mug</h2>
+<label>Size<input id="size" type="range" min=".12" max="2.5" step=".01" value="1"></label>
+<label>Rotation <span id="rotationLabel">0°</span><input id="rotation" type="range" min="-45" max="45" step="1" value="0"></label>
+<label>White-background tolerance <span id="toleranceLabel">38</span><input id="tolerance" type="range" min="5" max="95" step="1" value="38"></label>
+<label>Shadow strength<input id="shadow" type="range" min="0" max="80" step="1" value="30"></label>
+<div class="row"><button id="reset" class="secondary">Reset positions</button><button id="save" class="secondary">Save layout JSON</button></div>
+<label>Load layout JSON<input type="file" id="load" accept=".json"></label>
+<p class="hint">Click and drag a mug in the preview. Adjust white removal individually. More tolerance can erase pale areas of a white mug, so inspect the edges carefully.</p></section>
 </aside>
-<div class="preview"><div class="row"><div><h2>Live preview</h2><p class="hint">1400 × 1400 · Your actual PNG artwork, not AI-generated text</p></div><button id="export">Export Etsy PNG</button></div>
-<canvas id="canvas" width="1400" height="1400" aria-label="Mug mockup editor"></canvas>
-<p class="hint">This is an illustration-based composition MVP. It does not claim to produce photorealistic hand occlusion or manufacturing-accurate cylindrical wraps. Each mug shows only one half of its original print at a time.</p></div>
-</main>
+<div class="panel"><div class="row"><div><h2>Live composition</h2><div class="hint">1400 × 1400 Etsy PNG · actual photographed mugs</div></div><button id="export">Export PNG</button></div>
+<canvas id="preview" width="1400" height="1400"></canvas>
+<p class="hint">Your printed mug is treated as a photographic cut-out, not as a generated design. For professional listings, verify the cut-out quality at full size. This editor does not generate people, infer hands, reconstruct hidden surfaces or guarantee photorealism.</p>
+</div></main>
 <script>
-const $=id=>document.getElementById(id),c=$('canvas'),ctx=c.getContext('2d'),W=1400;
-const base=[{x:700,y:870,scale:1,visible:true,side:'front',design:''},{x:1040,y:950,scale:.68,visible:false,side:'front',design:''},{x:360,y:950,scale:.68,visible:false,side:'back',design:''}];
-let mugs=structuredClone(base),designs=new Map(),active=0,photo=null,drag=null;
-const palettes={studio:['#e9e3d7','#c3ad98'],kitchen:['#e6eee5','#bac5b6'],cottage:['#e7d4bf','#ac8f74'],cafe:['#e3cab0','#988276'],clean:['#f9faf7','#dddeda']};
-const eligible=n=>/\b(road|street|lane|avenue|terrace|crescent|close|grove|drive|court|place|way|gardens|square|villas|mount|hill|croft|row|walk)\b/i.test(n)&&!/\bbridge\b/i.test(n);
-function nameOf(n){return n.split('/').pop().replace(/\.png$/i,'').replace(/^\d+_/,'').replace(/_wrap_print$/i,'').replace(/_/g,' ')}
-function loadImage(b){return new Promise((resolve,reject)=>{let i=new Image(),u=URL.createObjectURL(b);i.onload=()=>{URL.revokeObjectURL(u);resolve(i)};i.onerror=()=>{URL.revokeObjectURL(u);reject(new Error('Invalid image'))};i.src=u})}
-function store(){localStorage.setItem('mug-studio-config',JSON.stringify({mugs,scene:$('scene').value,people:$('people').value,active}))}
-function controls(){
- const names=[...designs.keys()].sort((a,b)=>a.localeCompare(b));
- $('mugControls').innerHTML=mugs.map((m,i)=>'<div class="mug"><div class="row"><button type="button" class="secondary" data-select="'+i+'">Mug '+(i+1)+'</button><label><input data-visible="'+i+'" type="checkbox" '+(m.visible?'checked':'')+'> Show</label></div><label>Street<select data-design="'+i+'">'+(names.length?names.map(n=>'<option value="'+n.replaceAll('"','&quot;')+'" '+(n===m.design?'selected':'')+'>'+n.replaceAll('<','&lt;')+'</option>').join(''):'<option>Import your ZIP</option>')+'</select></label><label>Visible side<select data-side="'+i+'"><option value="front" '+(m.side==='front'?'selected':'')+'>Front · face</option><option value="back" '+(m.side==='back'?'selected':'')+'>Back · map</option></select></label></div>').join('');
- document.querySelectorAll('[data-select]').forEach(el=>el.onclick=()=>{active=+el.dataset.select;$('size').value=mugs[active].scale;store();draw()});
- document.querySelectorAll('[data-visible]').forEach(el=>el.onchange=()=>{mugs[+el.dataset.visible].visible=el.checked;store();draw()});
- document.querySelectorAll('[data-design]').forEach(el=>el.onchange=()=>{mugs[+el.dataset.design].design=el.value;store();draw()});
- document.querySelectorAll('[data-side]').forEach(el=>el.onchange=()=>{mugs[+el.dataset.side].side=el.value;store();draw()});
+'use strict';
+const $=id=>document.getElementById(id),canvas=$('preview'),ctx=canvas.getContext('2d'),DIM=1400;
+const library=new Map();let placements=[],selected=-1,background=null,scene='studio',drag=null,number=0;
+const palettes={studio:['#fafaf7','#d9d8d0'],kitchen:['#ecf2eb','#c5d4c7'],cottage:['#eee1d0','#b7a08a']};
+function safeName(f){return f.replace(/\.[^.]+$/,'').replace(/^\d+_/,'').replace(/_wrap_print$/i,'').replaceAll('_',' ')}
+function readImage(file){return new Promise((resolve,reject)=>{const u=URL.createObjectURL(file),im=new Image();im.onload=()=>{URL.revokeObjectURL(u);resolve(im)};im.onerror=()=>{URL.revokeObjectURL(u);reject(Error('Could not read image'))};im.src=u})}
+function processCutout(im,tolerance){
+ // Flood-fill nearly-white pixels connected to the outer image border.
+ // Unlike globally removing white, this preserves the white ceramic body.
+ const w=im.naturalWidth,h=im.naturalHeight;
+ const src=document.createElement('canvas');src.width=w;src.height=h;
+ const g=src.getContext('2d',{willReadFrequently:true});g.drawImage(im,0,0);
+ const frame=g.getImageData(0,0,w,h),d=frame.data,seen=new Uint8Array(w*h),queue=new Int32Array(w*h);let head=0,tail=0;
+ const isWhite=p=>{let k=p*4;return d[k+3]<16||(d[k]>=255-tolerance&&d[k+1]>=255-tolerance&&d[k+2]>=255-tolerance)};
+ function visit(p){if(p<0||p>=w*h||seen[p]||!isWhite(p))return;seen[p]=1;queue[tail++]=p}
+ for(let x=0;x<w;x++){visit(x);visit((h-1)*w+x)}
+ for(let y=0;y<h;y++){visit(y*w);visit(y*w+w-1)}
+ while(head<tail){const p=queue[head++],x=p%w,y=(p/w)|0;if(x>0)visit(p-1);if(x<w-1)visit(p+1);if(y>0)visit(p-w);if(y<h-1)visit(p+w)}
+ let left=w,top=h,right=0,bottom=0;
+ for(let p=0;p<w*h;p++){const k=p*4;if(seen[p])d[k+3]=0;else if(d[k+3]>0){let x=p%w,y=(p/w)|0;if(x<left)left=x;if(x>right)right=x;if(y<top)top=y;if(y>bottom)bottom=y}}
+ if(left>right)throw Error('Image appears entirely white. Lower the tolerance.');
+ g.putImageData(frame,0,0);
+ // Keep a small margin. No blur applied to print or mug pixels.
+ const margin=Math.max(3,Math.round(Math.min(w,h)*.012));
+ left=Math.max(0,left-margin);top=Math.max(0,top-margin);right=Math.min(w-1,right+margin);bottom=Math.min(h-1,bottom+margin);
+ const cropped=document.createElement('canvas');cropped.width=right-left+1;cropped.height=bottom-top+1;
+ cropped.getContext('2d').drawImage(src,left,top,cropped.width,cropped.height,0,0,cropped.width,cropped.height);
+ return cropped;
 }
-function mugRect(m){let w=380*m.scale,h=310*m.scale;return {x:m.x-w/2,y:m.y-h/2,w,h}}
+function active(){return placements[selected]}
+function getImage(p){return library.get(p.key)}
+function refreshCutout(p){const entry=getImage(p);if(!entry)return;const key=String(p.tolerance);if(!entry.cache.has(key))entry.cache.set(key,processCutout(entry.image,p.tolerance));}
 function draw(){
- let [a,b]=palettes[$('scene').value]||palettes.studio,gr=ctx.createLinearGradient(0,0,W,W);gr.addColorStop(0,a);gr.addColorStop(1,b);ctx.fillStyle=gr;ctx.fillRect(0,0,W,W);
- if(photo){let k=Math.max(W/photo.width,W/photo.height),w=photo.width*k,h=photo.height*k;ctx.drawImage(photo,(W-w)/2,(W-h)/2,w,h)}
- for(let i=0;i<mugs.length;i++){
-  let m=mugs[i];if(!m.visible)continue;
-  const r=mugRect(m),{x,y,w,h}=r;
-  ctx.save();ctx.fillStyle='#00000024';ctx.beginPath();ctx.ellipse(m.x,m.y+h*.57,w*.54,h*.12,0,0,Math.PI*2);ctx.fill();
-  ctx.strokeStyle='#f2f2ef';ctx.lineWidth=36*m.scale;ctx.beginPath();ctx.ellipse(x+w*.94,y+h*.43,w*.24,h*.31,0,0,Math.PI*2);ctx.stroke();
-  ctx.shadowColor='#0004';ctx.shadowBlur=21*m.scale;ctx.shadowOffsetY=9*m.scale;
-  const q=ctx.createLinearGradient(x,y,x+w,y);q.addColorStop(0,'#dadbd9');q.addColorStop(.19,'#fff');q.addColorStop(.74,'#fff');q.addColorStop(1,'#cbcecc');
-  ctx.fillStyle=q;ctx.beginPath();ctx.moveTo(x+w*.03,y);ctx.lineTo(x+w*.97,y);ctx.lineTo(x+w*.9,y+h*.93);ctx.quadraticCurveTo(x+w*.5,y+h*1.05,x+w*.1,y+h*.93);ctx.closePath();ctx.fill();ctx.restore();
-  let img=designs.get(m.design);if(img){
-   ctx.save();ctx.beginPath();ctx.moveTo(x+w*.07,y+h*.14);ctx.lineTo(x+w*.93,y+h*.14);ctx.lineTo(x+w*.87,y+h*.83);ctx.quadraticCurveTo(x+w*.5,y+h*.89,x+w*.13,y+h*.83);ctx.closePath();ctx.clip();
-   const half=img.width/2,sx=m.side==='front'?0:half;
-   // Each side uses only its own half. No artificial lettering or redrawing.
-   ctx.drawImage(img,sx,0,half,img.height,x+w*.09,y+h*.14,w*.82,h*.7);
-   let shading=ctx.createLinearGradient(x+w*.09,0,x+w*.91,0);
-   shading.addColorStop(0,'#00000028');shading.addColorStop(.25,'#ffffff00');shading.addColorStop(.7,'#ffffff00');shading.addColorStop(1,'#00000021');
-   ctx.fillStyle=shading;ctx.fillRect(x,y,w,h);ctx.restore();
-  }
-  if(i===active){ctx.save();ctx.setLineDash([10,7]);ctx.strokeStyle='#28725e';ctx.lineWidth=3;ctx.strokeRect(x-9,y-9,w+18,h+18);ctx.restore()}
- }
+ const grad=ctx.createLinearGradient(0,0,DIM,DIM),palette=palettes[scene];grad.addColorStop(0,palette[0]);grad.addColorStop(1,palette[1]);ctx.fillStyle=grad;ctx.fillRect(0,0,DIM,DIM);
+ if(background){const s=Math.max(DIM/background.width,DIM/background.height),w=background.width*s,h=background.height*s;ctx.drawImage(background,(DIM-w)/2,(DIM-h)/2,w,h)}
+ placements.forEach((p,i)=>{const entry=getImage(p);if(!entry)return;try{refreshCutout(p)}catch{return}
+ const img=entry.cache.get(String(p.tolerance)),ratio=img.width/img.height,dh=440*p.scale,dw=dh*ratio;
+ ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rotation*Math.PI/180);
+ ctx.shadowColor='rgba(27,28,23,'+(p.shadow/130)+')';ctx.shadowBlur=28*p.scale;ctx.shadowOffsetY=17*p.scale;
+ ctx.drawImage(img,-dw/2,-dh/2,dw,dh);ctx.shadowColor='transparent';
+ if(i===selected){ctx.setLineDash([11,8]);ctx.strokeStyle='#147e67';ctx.lineWidth=3;ctx.strokeRect(-dw/2-8,-dh/2-8,dw+16,dh+16)}ctx.restore();
+ });
 }
-$('archive').onchange=async e=>{
- const files=[...e.target.files];if(!files.length)return;
- $('status').textContent='Loading '+files.length+' image'+(files.length===1?'':'s')+'…';
- let loaded=0,failed=0;
- for(const file of files){
-   if(!file.type.startsWith('image/')){failed++;continue}
-   try{
-     const img=await loadImage(file);
-     const name=nameOf(file.name);
-     designs.set(name,img);
-     loaded++;
-   }catch(err){failed++;console.warn('Cannot load',file.name,err)}
- }
- const keys=[...designs.keys()].sort((a,b)=>a.localeCompare(b));
- mugs.forEach((m,i)=>{if(!designs.has(m.design))m.design=keys[Math.min(i,keys.length-1)]||''});
- $('status').textContent=loaded+' image'+(loaded===1?'':'s')+' loaded'+(failed?' · '+failed+' could not be read':'')+'. '+designs.size+' total designs available.';
- controls();draw();store();
- // Permit selecting the same file again after clearing/change.
- e.target.value='';
+function redrawItems(){
+ $('items').innerHTML='';
+ placements.forEach((p,i)=>{const wrap=document.createElement('div');wrap.className='item'+(i===selected?' active':'');const b=document.createElement('button');b.className='secondary';b.textContent='Mug '+(i+1)+(i===selected?' ✓':'');b.onclick=()=>choose(i);wrap.append(b);
+ const sel=document.createElement('select');for(const [key,entry] of library){const opt=document.createElement('option');opt.value=key;opt.textContent=entry.name;if(p.key===key)opt.selected=true;sel.append(opt)}sel.onchange=()=>{p.key=sel.value;choose(i);draw()};wrap.append(sel);$('items').append(wrap)});
+ $('add').disabled=!library.size||placements.length>=3;$('remove').disabled=selected<0;
+}
+function choose(i){selected=i;const p=active();if(p){$('size').value=p.scale;$('rotation').value=p.rotation;$('rotationLabel').textContent=p.rotation+'°';$('tolerance').value=p.tolerance;$('toleranceLabel').textContent=p.tolerance;$('shadow').value=p.shadow}redrawItems();draw()}
+function add(key){if(placements.length===3)return;const i=placements.length;placements.push({key:key||[...library.keys()][0],x:700+(i-1)*250,y:850+(i%2)*70,scale:i===0?1:.75,rotation:0,tolerance:38,shadow:30});choose(i)}
+$('mugFiles').onchange=async e=>{const files=[...e.target.files];let loaded=0,errors=[];
+ for(const f of files){if(!f.type.startsWith('image/')){errors.push(f.name);continue}try{const im=await readImage(f),key='mug-'+(++number);library.set(key,{name:safeName(f.name),image:im,cache:new Map()});loaded++}catch{errors.push(f.name)}}
+ if(loaded&&!placements.length)add([...library.keys()][0]);redrawItems();draw();$('status').textContent=loaded+' added · '+library.size+' image(s) available'+(errors.length?' · failed: '+errors.join(', '):'');e.target.value='';
 };
-$('photo').onchange=async e=>{if(e.target.files[0]){try{photo=await loadImage(e.target.files[0]);draw()}catch(err){alert(err.message)}}};
-['scene','people'].forEach(id=>$(id).onchange=()=>{store();draw()});
-$('size').oninput=e=>{mugs[active].scale=+e.target.value;store();draw()};
-$('reset').onclick=()=>{mugs.forEach((m,i)=>Object.assign(m,{x:base[i].x,y:base[i].y,scale:base[i].scale}));$('size').value=mugs[active].scale;store();draw()};
-$('save').onclick=()=>download(new Blob([JSON.stringify({scene:$('scene').value,people:$('people').value,mugs},null,2)],{type:'application/json'}),'mug-studio-setup.json');
-$('load').onchange=async e=>{try{let v=JSON.parse(await e.target.files[0].text());if(!Array.isArray(v.mugs)||v.mugs.length!==3)throw Error('Not a valid setup');mugs=v.mugs;$('scene').value=palettes[v.scene]?v.scene:'studio';$('people').value=v.people||'No people';controls();draw();store()}catch(err){alert('Cannot load setup: '+err.message)}};
-$('export').onclick=()=>c.toBlob(b=>{if(b)download(b,'etsy-mug-mockup.png')},'image/png');
-function download(blob,name){let u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
-function pt(e){let r=c.getBoundingClientRect();return {x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*W/r.height}}
-c.addEventListener('pointerdown',e=>{let p=pt(e);for(let i=mugs.length-1;i>=0;i--){let m=mugs[i],r=mugRect(m);if(m.visible&&p.x>=r.x&&p.x<=r.x+r.w&&p.y>=r.y&&p.y<=r.y+r.h){active=i;drag={x:p.x-m.x,y:p.y-m.y};c.setPointerCapture(e.pointerId);$('size').value=m.scale;draw();return}}});
-c.addEventListener('pointermove',e=>{if(!drag)return;let p=pt(e);mugs[active].x=p.x-drag.x;mugs[active].y=p.y-drag.y;draw()});
-c.addEventListener('pointerup',()=>{if(drag){drag=null;store()}});c.addEventListener('pointercancel',()=>{drag=null});
-try{let v=JSON.parse(localStorage.getItem('mug-studio-config')||'null');if(v){if(v.mugs?.length===3)mugs=v.mugs;if(palettes[v.scene])$('scene').value=v.scene;if(v.people)$('people').value=v.people;active=v.active||0}}catch{}
-controls();draw();
+$('sceneFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{background=await readImage(f);draw()}catch(err){alert(err.message)}};
+document.querySelectorAll('[data-scene]').forEach(b=>b.onclick=()=>{scene=b.dataset.scene;background=null;$('sceneFile').value='';draw()});
+$('add').onclick=()=>add();$('remove').onclick=()=>{if(selected<0)return;placements.splice(selected,1);selected=placements.length?Math.min(selected,placements.length-1):-1;redrawItems();if(selected>=0)choose(selected);else draw()};
+for(const [id,prop] of [['size','scale'],['rotation','rotation'],['tolerance','tolerance'],['shadow','shadow']]){$(id).oninput=e=>{const p=active();if(!p)return;p[prop]=Number(e.target.value);if(id==='rotation')$('rotationLabel').textContent=p.rotation+'°';if(id==='tolerance')$('toleranceLabel').textContent=p.tolerance;draw()}}
+$('reset').onclick=()=>{placements.forEach((p,i)=>{p.x=700+(i-1)*250;p.y=850+(i%2)*70;p.scale=i===0?1:.75;p.rotation=0});if(selected>=0)choose(selected);draw()};
+function download(blob,name){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),2000)}
+$('export').onclick=()=>{canvas.toBlob(b=>{if(b)download(b,'etsy-mug-composition.png')},'image/png')};
+$('save').onclick=()=>{download(new Blob([JSON.stringify({version:2,scene,demographic:$('demographic').value,placements:placements.map(p=>({...p,name:getImage(p)?.name}))},null,2)],{type:'application/json'}),'mug-layout.json')};
+$('load').onchange=async e=>{try{const file=e.target.files[0];if(!file)return;const obj=JSON.parse(await file.text());if(!Array.isArray(obj.placements)||obj.placements.length>3)throw Error('Invalid configuration');scene=palettes[obj.scene]?obj.scene:'studio';$('demographic').value=obj.demographic||'No people';const byName=new Map([...library].map(([key,entry])=>[entry.name,key]));placements=obj.placements.map(p=>({...p,key:byName.get(p.name)||p.key})).filter(p=>library.has(p.key));selected=placements.length?0:-1;redrawItems();if(selected>=0)choose(0);draw()}catch(err){alert('Could not load layout: '+err.message)}};
+function pointer(e){const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*DIM/r.width,y:(e.clientY-r.top)*DIM/r.height}}
+canvas.addEventListener('pointerdown',e=>{const pt=pointer(e);for(let i=placements.length-1;i>=0;i--){let p=placements[i],entry=getImage(p);if(!entry)continue;refreshCutout(p);let im=entry.cache.get(String(p.tolerance)),w=440*p.scale*(im.width/im.height),h=440*p.scale,dx=pt.x-p.x,dy=pt.y-p.y,r=-p.rotation*Math.PI/180,lx=dx*Math.cos(r)-dy*Math.sin(r),ly=dx*Math.sin(r)+dy*Math.cos(r);if(Math.abs(lx)<w/2&&Math.abs(ly)<h/2){choose(i);drag={dx,dy};canvas.setPointerCapture(e.pointerId);break}}});
+canvas.addEventListener('pointermove',e=>{if(!drag||selected<0)return;const p=active(),pt=pointer(e);p.x=pt.x-drag.dx;p.y=pt.y-drag.dy;draw()});canvas.addEventListener('pointerup',()=>drag=null);canvas.addEventListener('pointercancel',()=>drag=null);
+redrawItems();draw();
 </script></body></html>
