@@ -4,7 +4,7 @@
 </style></head><body>
 <header><h1>Mug Mockup Studio</h1><p>Scene templates + original wrap-print mapping · front and back never mixed</p></header>
 <main><aside>
-<section><h2>1 · Scene library</h2><div id="scenes" class="scenes"></div><label>Optional: use your own scene photograph<input id="backgroundInput" type="file" accept="image/*"></label><div class="muted">Built-in scenes are illustrated layout templates, not photorealistic photos. A photographic template requires a separate calibrated blank-mug image. You can load one here and adjust the mug positions.</div></section>
+<section><h2>1 · Scene library</h2><div id="scenes" class="scenes"></div><label>Import photorealistic scenes (select one or multiple)<input id="sceneImages" type="file" accept="image/png,image/jpeg,image/webp" multiple></label><label>Or upload a single scene photograph<input id="backgroundInput" type="file" accept="image/*"></label><div id="sceneStatus" class="notice">Import the scene pack images to display real photographs behind the mug layouts.</div><div class="muted">Choose a photographic scene after importing it. The built-in illustrated layouts remain as fallbacks. The photographed blank mug surfaces must be calibrated for a perfect print fit.</div></section>
 <section><h2>2 · Your cartographic prints</h2><label>Upload one or several original wrap-print files<input id="prints" type="file" accept="image/png,image/jpeg,image/webp" multiple></label><div id="status" class="notice">Upload the flat artwork PNG files. These are not finished mug photographs.</div></section>
 <section><h2>3 · Place mug prints</h2><div id="slots"></div><div class="row"><button id="add" class="alt">Add mug</button><button id="remove" class="alt">Remove selected mug</button></div></section>
 <section><h2>4 · Adjust selected mug</h2>
@@ -25,9 +25,15 @@ const specs=[
 {id:'countryside',label:'Countryside break',palette:['#a8c7d0','#79a56a'],kind:'people',n:2,positions:[[470,825],[930,825]]},
 {id:'party',label:'Children’s party',palette:['#fcdfbc','#e8a1a5'],kind:'party',n:3,positions:[[300,945],[690,960],[1090,945]]},
 {id:'rural',label:'Rural product display',palette:['#b7d3bf','#698d57'],kind:'landscape',n:2,positions:[[470,865],[940,865]]},
-{id:'friends',label:'Young friends',palette:['#d9ddd0','#aebdbc'],kind:'people',n:3,positions:[[350,970],[700,920],[1050,975]]}
+{id:'friends',label:'Young friends',palette:['#d9ddd0','#aebdbc'],kind:'people',n:3,positions:[[350,970],[700,920],[1050,975]]},
+{id:'kitchen',label:'Cottage kitchen',palette:['#e6d7bb','#ad9a82'],kind:'landscape',n:3,positions:[[300,930],[700,940],[1080,930]]},
+{id:'office',label:'Home office',palette:['#e9e6de','#b3c4b7'],kind:'landscape',n:1,positions:[[750,885]]},
+{id:'living',label:'Cosy living room',palette:['#d9c4ac','#8c7864'],kind:'landscape',n:1,positions:[[750,905]]},
+{id:'cafe',label:'Café morning',palette:['#b89e88','#705b4f'],kind:'landscape',n:2,positions:[[440,950],[930,940]]},
+{id:'breakfast',label:'Family breakfast',palette:['#ecd2a9','#bd9d80'],kind:'landscape',n:3,positions:[[280,910],[700,920],[1090,910]]},
+{id:'town',label:'Town view',palette:['#b5d3cf','#7fa18c'],kind:'landscape',n:3,positions:[[270,925],[690,935],[1100,925]]}
 ];
-let scene=specs[0],background=null,library=new Map(),nextKey=0,mugs=[],selected=-1,drag=null;
+let scene=specs[0],background=null,photoScenes=new Map(),library=new Map(),nextKey=0,mugs=[],selected=-1,drag=null;
 function image(file){return new Promise((resolve,reject)=>{let im=new Image(),url=URL.createObjectURL(file);im.onload=()=>{URL.revokeObjectURL(url);resolve(im)};im.onerror=()=>{URL.revokeObjectURL(url);reject(Error('Invalid image'))};im.src=url})}
 function filename(s){return s.replace(/\.[^.]+$/,'').replace(/^\d+_/,'').replace(/_wrap_print$/i,'').replace(/_/g,' ')}
 function pictogram(ctx,kind){ctx.save();const w=S;
@@ -40,7 +46,7 @@ function pictogram(ctx,kind){ctx.save();const w=S;
  if(kind==='party'){ctx.fillStyle='#f5e5b9';ctx.fillRect(585,1040,230,75);ctx.fillStyle='#d57580';ctx.fillRect(660,1000,80,40)}
  ctx.restore()}
 function drawScene(ctx= g){let grad=ctx.createLinearGradient(0,0,0,S);grad.addColorStop(0,scene.palette[0]);grad.addColorStop(1,scene.palette[1]);ctx.fillStyle=grad;ctx.fillRect(0,0,S,S);
- if(background){let k=Math.max(S/background.width,S/background.height),w=background.width*k,h=background.height*k;ctx.drawImage(background,(S-w)/2,(S-h)/2,w,h)}
+ const scenePhoto=background||photoScenes.get(scene.id);if(scenePhoto){let k=Math.max(S/scenePhoto.width,S/scenePhoto.height),w=scenePhoto.width*k,h=scenePhoto.height*k;ctx.drawImage(scenePhoto,(S-w)/2,(S-h)/2,w,h)}
  else pictogram(ctx,scene.kind)}
 // One half of the flat wrap is used at any one time. The image itself is never rewritten.
 function geometry(p){const h=330*p.scale,w=360*p.scale;return {x:p.x,y:p.y,h,w}}
@@ -60,7 +66,7 @@ function renderMug(ctx,p,sel){let a=geometry(p),{w,h}=a;ctx.save();ctx.translate
 function draw(){drawScene();mugs.forEach((p,i)=>renderMug(g,p,i===selected))}
 function setScene(id){scene=specs.find(s=>s.id===id)||specs[0];background=null;$('backgroundInput').value='';mugs=scene.positions.map((pos,i)=>({x:pos[0],y:pos[1],key:[...library.keys()][Math.min(i,library.size-1)]||'',scale:1,side:i%2?'back':'front',rotation:0,coverage:.85}));selected=mugs.length?0:-1;ui();draw()}
 function ui(){const names=[...library.entries()];$('scenes').innerHTML='';
- for(const s of specs){const b=document.createElement('button');b.className='scene'+(s.id===scene.id?' active':'');b.innerHTML='<svg viewBox="0 0 240 90" preserveAspectRatio="none"><defs><linearGradient id="gr'+s.id+'" x2="0" y2="1"><stop stop-color="'+s.palette[0]+'"/><stop offset="1" stop-color="'+s.palette[1]+'"/></linearGradient></defs><rect width="240" height="90" fill="url(#gr'+s.id+')"/><rect x="0" y="65" width="240" height="25" fill="#b78f6b"/>'+(s.kind==='landscape'?'<path d="M0 60 Q40 12 100 55 Q150 10 240 57" fill="#70976e"/>':'<circle cx="90" cy="25" r="14" fill="#c4a38c"/><ellipse cx="90" cy="68" rx="28" ry="33" fill="#5d8073"/>')+'<rect x="142" y="49" width="31" height="33" rx="3" fill="white" stroke="#aab2ac"/></svg><span>'+s.label+'</span>';b.onclick=()=>setScene(s.id);$('scenes').append(b)}
+ for(const s of specs){const b=document.createElement('button');b.className='scene'+(s.id===scene.id?' active':'');b.innerHTML='<svg viewBox="0 0 240 90" preserveAspectRatio="none"><defs><linearGradient id="gr'+s.id+'" x2="0" y2="1"><stop stop-color="'+s.palette[0]+'"/><stop offset="1" stop-color="'+s.palette[1]+'"/></linearGradient></defs><rect width="240" height="90" fill="url(#gr'+s.id+')"/><rect x="0" y="65" width="240" height="25" fill="#b78f6b"/>'+(s.kind==='landscape'?'<path d="M0 60 Q40 12 100 55 Q150 10 240 57" fill="#70976e"/>':'<circle cx="90" cy="25" r="14" fill="#c4a38c"/><ellipse cx="90" cy="68" rx="28" ry="33" fill="#5d8073"/>')+'<rect x="142" y="49" width="31" height="33" rx="3" fill="white" stroke="#aab2ac"/></svg><span>'+s.label+'</span>';b.onclick=()=>setScene(s.id);if(photoScenes.has(s.id)){const note=document.createElement('small');note.textContent=' · photo loaded';b.querySelector('span').append(note)}$('scenes').append(b)}
  $('slots').innerHTML='';for(let i=0;i<mugs.length;i++){const p=mugs[i],box=document.createElement('div');box.className='slot'+(i===selected?' selected':'');const name=document.createElement('button');name.className='alt';name.textContent='Mug '+(i+1);name.onclick=()=>select(i);box.append(name);
  const choose=document.createElement('select');for(const [key,item] of names){let o=document.createElement('option');o.value=key;o.textContent=item.name;o.selected=p.key===key;choose.append(o)}choose.onchange=()=>{p.key=choose.value;draw()};box.append(choose);
  const side=document.createElement('select');side.innerHTML='<option value="front">Front · face</option><option value="back">Back · map</option>';side.value=p.side;side.onchange=()=>{p.side=side.value;draw()};box.append(side);$('slots').append(box)}
@@ -68,6 +74,22 @@ function ui(){const names=[...library.entries()];$('scenes').innerHTML='';
 }
 function select(i){selected=i;const p=mugs[i];if(p){$('scale').value=p.scale;$('rotation').value=p.rotation;$('coverage').value=p.coverage}ui();draw()}
 $('prints').onchange=async e=>{let ok=0,bad=[];for(let f of e.target.files){if(!f.type.startsWith('image/'))continue;try{let im=await image(f),key='art'+(++nextKey);library.set(key,{image:im,name:filename(f.name)});ok++}catch{bad.push(f.name)}}mugs.forEach((p,i)=>{if(!library.has(p.key))p.key=[...library.keys()][Math.min(i,library.size-1)]||''});$('status').textContent=library.size+' prints available · '+ok+' newly loaded'+(bad.length?' · could not read '+bad.join(', '):'');ui();draw();e.target.value=''};
+// Import scene-pack JPEGs by numbered filename; choose the matching scene.
+const photoOrder=['workmates','home','countryside','party','friends','rural','kitchen','office','living','cafe','breakfast','town'];
+$('sceneImages').onchange=async e=>{
+ let n=0,errors=[];
+ for(const file of [...e.target.files]){
+  if(!file.type.startsWith('image/'))continue;
+  const match=file.name.match(/^(\\d{1,2})[_ -]/);
+  const index=match?Number(match[1])-1:-1;
+  const id=photoOrder[index]||specs.find(s=>file.name.toLowerCase().includes(s.id))?.id;
+  if(!id){errors.push(file.name);continue}
+  try{photoScenes.set(id,await image(file));n++}catch{errors.push(file.name)}
+ }
+ $('sceneStatus').textContent=n+' photographic scenes loaded'+(errors.length+' unmatched or invalid files: '+errors.join(', ')).replace('0 unmatched or invalid files: ','');
+ // Restore the user's selected scene with its newly loaded photo.
+ ui();draw();e.target.value='';
+};
 $('backgroundInput').onchange=async e=>{try{if(e.target.files[0])background=await image(e.target.files[0]);draw()}catch(err){alert(err.message)}};
 $('add').onclick=()=>{if(mugs.length>=3)return;let i=mugs.length;mugs.push({key:[...library.keys()][Math.min(i,library.size-1)]||'',x:400+i*290,y:880,scale:.8,rotation:0,coverage:.85,side:'front'});select(i)};
 $('remove').onclick=()=>{if(selected<0)return;mugs.splice(selected,1);selected=mugs.length?0:-1;ui();draw()};
