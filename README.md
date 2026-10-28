@@ -46,3 +46,7 @@ Do not commit private original artwork or customer photos to the public repo unl
 ## Photographic scene-pack note
 
 The downloadable pack is derived by cropping a generated 3×4 contact sheet. It is **low-resolution prototype material**, not independent high-resolution production photography. Scene images are selected by their numbered filenames from `01_` through `12_`. The imported photos contain blank white mugs but are **not calibrated with surface or hand masks**, so the exported result may display duplicate or misaligned mugs. Use the scene pack for evaluating the user interface only, not final Etsy product listings.
+
+## Fine calibration controls
+
+In **Adjust selected mug**, drag and resize the virtual print position, then independently adjust **Print width**, **Print height**, **Artwork coverage** and **Rotation** to fit the mug in the photo. The **Show placement guides** checkbox only affects the editor; guides are automatically excluded from PNG export. These controls are approximate; a photographed mug with fingers in front still needs hand occlusion masks to be production-quality.
