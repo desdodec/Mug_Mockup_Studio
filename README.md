@@ -1,41 +1,44 @@
-# Mug Mockup Studio
+# Mug Mockup Studio — Scene & Wrap Editor
 
-Browser-based compositor for **finished photographs of printed mugs**, intended for Etsy lifestyle compositions.
+A browser-only prototype for your cartographic Etsy mugs. Runs directly from the repository root; **no npm, Vite or Rollup**.
 
-## Run
+## Start
 
-Clone or pull the repository in VS Code, then open the root `index.html` in your browser (or with Live Server).
+Open `index.html` in your web browser, or use VS Code Live Server.
+
+To update an existing local clone:
 
 ```powershell
+cd D:\Python_Stuff\Mug_Mockup_Studio
 git pull origin main
 ```
 
-No `npm install` and no Rollup/Vite required.
+## Current workflow
 
-## Workflow
+1. Choose one of six scene-layout presets, inspired by your reference photographs: workmates outside, relaxing at home, countryside break, children's party, rural product display, or young friends.
+2. Upload one or several **original flat wrap-print PNGs**. The editor assumes the left half contains the front face and the right half contains the reverse map.
+3. Choose up to three mugs and independently select a print and visible side for each mug.
+4. Drag virtual mugs within the scene, adjust size, rotation and artwork coverage.
+5. Export a 1400×1400 PNG or save/load JSON layout.
+6. Optionally upload a **scene photograph** as the background instead of the illustrated layout.
 
-1. Upload **one or several actual mug mockup images** (PNG, JPG or WebP), preferably against clean white backgrounds. These should already display the correctly printed cartographic design.
-2. Upload a **scene photograph** (for example, a kitchen, living room, outdoor table or staged scene containing people). The three preset backgrounds are only colour gradients.
-3. Select a mug from the library and **add it to the scene**, up to three at once. You can use a different photograph for each mug.
-4. Drag to position; adjust size, rotation, background-removal tolerance and shadow strength.
-5. Export the **1400 × 1400 PNG**, or save/load a JSON layout.
+Your print artwork is sampled directly from the image; it is **not redrawn by AI**.
 
-## How background removal works
+## Important distinction
 
-The editor removes only near-white pixels connected to the edges of the original mug photograph. This generally preserves the mug's white ceramic body, since it is separated from the background by darker edge pixels. Some white-on-white images lack enough contrast and may need an externally prepared transparent PNG. Adjust **White-background tolerance** while watching the preview.
+The six **built-in** scene templates currently use simple illustrated scene layouts. They do **not** yet include the photographic source scenes supplied as visual references or the generated contact sheet. That contact sheet is unsuitable as a printable asset because its labelled tiles are not full-resolution independent scene photographs.
 
-This processing **does not recreate any print design**: the original printed mug photo supplies the pixels.
+This release demonstrates interaction, street-print selection, one-side-only rendering, and approximate cylindrical artwork warping. It is **not a completed photorealistic mug replacement system**. In particular it lacks:
 
-## Important limitations
+- calibrated printable surface coordinates for individual photographic mug templates;
+- depth/foreground masks to preserve fingers in front of the mug;
+- true perspective and lighting matching;
+- a bundled set of high-resolution blank-mug lifestyle photographs.
 
-- This version does **not** generate people or rooms from the dropdown: upload a suitable lifestyle scene image. The demographic selector only records an intent in the layout JSON.
-- It does not automatically place fingers in front of a cut-out mug. For a convincingly held mug, source imagery needs either a hand/foreground mask or specialist editing.
-- It does not infer 3D lighting, cast realistic contact shadows or match photographic perspective. It adds a simple configurable shadow.
-- Background scene photographs are not stored in the JSON file. Re-upload the scene and mug photographs when reopening the project.
-- Inspect cut-out edges, handle holes and artwork before using the export in a live product listing.
+For a production system, each selected photo scene must have an associated mug-surface mapping and hand/foreground masks. Do not use the illustrated outputs as factual product photographs.
 
-## Project layout
+## Files
 
-All current application code is in the **repository root** `index.html`. There is intentionally no nested `Mug_Mockup_Studio` directory.
+The project remains at the **repository root** (`index.html`, `README.md`). There is no nested duplicate project folder.
 
-Please do not commit your private product photos to this public repository unless you intend to publish them.
+Do not commit private original artwork or customer photos to the public repo unless intended.
