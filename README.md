@@ -1,38 +1,48 @@
 # Mug Mockup Studio
 
-An Etsy mug mockup editor for original cartographic street-print artwork.
+A standalone browser-based editor for creating illustrative Etsy mockups using your original cartographic mug artwork.
 
-## Install (Windows PowerShell)
+## Start (no npm required)
 
-Use Node.js 20.19+ or 22.12+.
+1. Clone or pull the repository in VS Code.
+2. Open `index.html` in a web browser. You can also use the VS Code **Live Server** extension.
+3. Import your ZIP containing files named `*_wrap_print.png`.
+
+The app loads JSZip from a public CDN, so **internet access is required** when opening it. Artwork is processed locally in your browser and is not uploaded to a server.
+
+### Windows PowerShell
 
 ```powershell
-npm install
-npm run dev
+git clone https://github.com/desdodec/Mug_Mockup_Studio.git
+cd Mug_Mockup_Studio
 ```
 
-If Rollup reports `MODULE_NOT_FOUND` for a native binary (often `@rollup/rollup-win32-x64-msvc`), remove the possibly incomplete install and reinstall:
+Then open `index.html` in your browser. **You do not need `npm install` or `npm run dev`**, so the earlier native Rollup module error does not apply to this version.
+
+If you already cloned the repository, run:
 
 ```powershell
-Remove-Item -Recurse -Force node_modules -ErrorAction SilentlyContinue
-Remove-Item package-lock.json -ErrorAction SilentlyContinue
-npm cache verify
-npm install --include=optional
-npm run dev
+git pull origin main
 ```
 
-Do not commit `node_modules` or your print ZIP. Import your artwork through the browser.
+## Current features
 
-## What the prototype does
+- Import street print PNGs from a ZIP and filter out bridges and entries without a recognised street suffix.
+- Select up to three different designs and independently choose front (face) or back (map) print sides.
+- Preview each side using the actual original image, rather than AI-redrawn artwork.
+- Move and resize illustrated mugs in a square 1400px workspace.
+- Choose backdrop palettes, upload a background photograph, and store a people demographic as a creative brief.
+- Export a 1400×1400 PNG, and save/load configuration JSON.
 
-- Import your ZIP and filter for street-named wrap-print PNGs.
-- Select up to three mugs and show either the face/front or reverse/map side.
-- Choose a scene palette or upload a real scene photograph.
-- Drag and scale mug illustrations in a square preview; export a 1400px PNG.
-- Save a lightweight configuration file.
+## Limitations
 
-Artwork is copied from your PNG rather than AI-redrawn. This is a flat/cylindrical-style illustration editor, **not yet a photorealistic photo-compositing pipeline**. It cannot correctly hide mugs behind fingers or insert a print onto an already photographed curved mug without calibrated masks.
+This is a working **illustration-based MVP**, not a photorealistic replacement for mug photography. Mug shapes and artwork projection are approximations; hand occlusion and real photographed mug surface mapping are **not implemented**. The people choice is metadata and does not generate people. Re-import the ZIP after a page reload; image assets are not persisted. The artwork assumes each print's left half is the front and right half is the back.
 
-## Run in VS Code
+Never put your private print ZIP into the public repository unless you intend to share those files.
 
-Open the repository folder, then use the terminal commands above. Use `npm run build` to create `dist/`.
+## Development roadmap
+
+- Use calibrated photographed mug templates and actual surface masks.
+- Preserve exact front/back crop boundaries and source artwork.
+- Make people/scene generation independent from the print compositing.
+- Add hand/foreground masking and verified export quality.
